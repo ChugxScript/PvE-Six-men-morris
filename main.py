@@ -8,6 +8,8 @@ current_phase = valors.MAIN_DISPLAY
 # Set up the screen
 screen = pygame.display.set_mode((valors.WIDTH, valors.HEIGHT))
 pygame.display.set_caption("Six Men Morris")
+icon = pygame.image.load(valors.game_icon1)
+pygame.display.set_icon(icon)
 
 def mainDisplay(mouse_x, mouse_y):
     background_image = pygame.image.load(valors.main_cover)

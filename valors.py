@@ -37,6 +37,8 @@ player_moves = {
     player_two: []
 }
 
+game_icon1 = "./resources/GameIcon1.png"
+game_icon2 = "./resources/GameIcon2.png"
 main_cover = "./resources/MainCover.png"
 choose_color = "./resources/ChooseColor3.png"
 white_piece_img = "./resources/white_piece1.png"
