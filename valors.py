@@ -4,6 +4,8 @@ WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+PLAY_AGAIN_COLOR = (64, 64, 64)
+EXIT_COLOR = (32, 32, 32)
 
 MAIN_DISPLAY = 0
 CHOOSE_COLOR_CHAR = 1
@@ -14,11 +16,20 @@ GAMEPLAY_PLAYER_WON = 5
 GAMEPLAY_PLAYER_LOSE = 6
 GAMEPLAY_PLAYER_DRAW = 7
 
-GAMEPLAY_MOVE_PIECE = 8
+GAMEPLAY_SELECT_PIECE_TO_MOVE = 8
+GAMEPLAY_SELECT_VALID_POINT = 9
+GAMEPLAY_NO_VALID_MOVES = 10
 
 player_one = 1
 player_two = 2
 curr_player = 0
+player_user = 0
+piece_clicked = (0, 0)
+prev_piece_clicked = (0, 0)
+white_piece_clicked = False
+black_piece_clicked = False
+curr_piece_clicked = False
+secondPhase_currPhase = GAMEPLAY_SELECT_PIECE_TO_MOVE
 
 player_pieces = {player_one: 6, player_two: 6}
 player_moves = {
@@ -35,6 +46,8 @@ game_bg = "./resources/GameBG1.png"
 game_bg3_yourTurn = "./resources/BG3-YourTurn.png"
 game_bg4_opponentTurn = "./resources/BG4-OpponentTurn.png"
 game_bg5_yourTurn2 = "./resources/BG5-YourTurn2.png"
+game_bg5_yourTurn2B = "./resources/BG5-YourTurn2B.png"
+game_bg5_yourTurn2C = "./resources/BG5-YourTurn2C.png"
 game_bg6_got3piece = "./resources/BG6-Got3Piece.png"
 game_bg7_youWon = "./resources/BG7-YouWon.png"
 game_bg8_youLose = "./resources/BG8-YouLose.png"
