@@ -19,6 +19,7 @@ GAMEPLAY_PLAYER_DRAW = 7
 GAMEPLAY_SELECT_PIECE_TO_MOVE = 8
 GAMEPLAY_SELECT_VALID_POINT = 9
 GAMEPLAY_NO_VALID_MOVES = 10
+GAMEPLAY_FINAL_PHASE = 11
 
 player_one = 1
 player_two = 2
@@ -30,9 +31,18 @@ white_piece_clicked = False
 black_piece_clicked = False
 curr_piece_clicked = False
 secondPhase_currPhase = GAMEPLAY_SELECT_PIECE_TO_MOVE
+isFinal_phase = False
 
-player_pieces = {player_one: 6, player_two: 6}
-player_moves = {
+player_pieces_onhold = {player_one: 6, player_two: 6}
+player_pieces_onboard = {
+    player_one: [],
+    player_two: []
+}
+player_pieces_mills = {
+    player_one: [],
+    player_two: []
+}
+player_pieces_prev_mills = {
     player_one: [],
     player_two: []
 }
