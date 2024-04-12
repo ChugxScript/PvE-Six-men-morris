@@ -5,17 +5,17 @@
 </p>
 
 <p>
-  <em>This serves as Machine Problem 4 in Artificial Intelligence (AI) Subject</em>
+  <em>**This serves as Machine Problem 4 in Artificial Intelligence (AI) Subject**</em>
 </p>
 
 ------------------
 
 ## ALGORITHM
 
-**MINIMAX ALGORITHM**
+<em>**MINIMAX ALGORITHM**</em>  
 is a decision-making technique used in game theory and artificial intelligence. It is commonly employed in turn-based games with multiple possible moves at each turn. The goal of the minimax algorithm is to determine the optimal move for a player, assuming that the opponent also plays optimally.
 
-In [PvE - Six Men Morris], the minimax algorithm is utilized by the AI player to make strategic decisions during gameplay. By exploring possible future game states and selecting the move that maximizes its chances of winning while minimizing the opponent's chances, the AI player aims to play optimally and provide a challenging experience for human players.
+In <em>**PvE - Six Men Morris**</em>, the minimax algorithm is utilized by the AI player to make strategic decisions during gameplay. By exploring possible future game states and selecting the move that maximizes its chances of winning while minimizing the opponent's chances, the AI player aims to play optimally and provide a challenging experience for human players.
 
 ------------------
 
