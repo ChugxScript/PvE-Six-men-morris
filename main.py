@@ -1,6 +1,7 @@
 import pygame
 import sys
 import valors # va for variables and lors for olors HAHAHAHAHAHA
+from aiolors import get_ai_move
 
 pygame.init()
 current_phase = valors.MAIN_DISPLAY
@@ -164,6 +165,7 @@ def startGame(mouse_x, mouse_y, curr_player, current_phase):
                         drawAvailableMoves()
 
                         if valors.player_pieces_onhold[valors.player_one] > 0 or valors.player_pieces_onhold[valors.player_two] > 0:
+                            pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
                             return valors.GAMEPLAY_PHASE, curr_player
                         else:
                             displayFeedback("SECOND PHASE.", (650, 185))
@@ -182,7 +184,54 @@ def startGame(mouse_x, mouse_y, curr_player, current_phase):
                         return valors.GAMEPLAY_PHASE, curr_player
         else:
             # get ai move 
-            pass
+            # get a point from ai
+            # placePieceOnBoard(curr_player, point)
+
+            return_value = get_ai_move(valors.GAMEPLAY_PHASE, curr_player)
+            placePieceOnBoard(curr_player, return_value)
+            drawPieces()
+
+            # check if curr_player place a 3 consecutive pieces
+            if isConsecutivePoints(curr_player):
+                
+                if isPiecesAlreadyMills(curr_player):
+                    valors.piece_clicked = (0, 0)
+                    valors.prev_piece_clicked = (0, 0)
+                    valors.curr_piece_clicked = False
+                    return valors.GAMEPLAY_REMOVE_PIECE, curr_player
+            else:
+                valors.player_pieces_mills[curr_player] = []
+                valors.player_pieces_prev_mills[curr_player] = []
+                    
+
+            # check if curr_player already won
+            winner = isCurrentPlayerWon(curr_player)
+            if winner != 0:
+                if winner == valors.player_user:
+                    return valors.GAMEPLAY_PLAYER_WON, winner
+                else:
+                    return valors.GAMEPLAY_PLAYER_LOSE, curr_player
+            
+            # check if the game is draw
+            if isGameDraw(curr_player):
+                return valors.GAMEPLAY_PLAYER_DRAW, curr_player
+            
+            # change current player
+            curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+            drawBoard(current_phase, curr_player)
+            drawCurrentBoard()
+            drawPieces()
+            drawAvailableMoves()
+
+            if valors.player_pieces_onhold[valors.player_one] > 0 or valors.player_pieces_onhold[valors.player_two] > 0:
+                return valors.GAMEPLAY_PHASE, curr_player
+            else:
+                displayFeedback("SECOND PHASE.", (650, 185))
+                pygame.time.wait(1000)
+                drawBoard(valors.secondPhase_currPhase, curr_player)
+                drawCurrentBoard()
+                return valors.GAMEPLAY_SECOND_PHASE, curr_player
+
         return valors.GAMEPLAY_PHASE, curr_player
     else:
         displayFeedback("SECOND PHASE.", (650, 185))
@@ -298,6 +347,7 @@ def secondPhaseGame(mouse_x, mouse_y, curr_player):
                                 pygame.time.wait(1000)  
 
                                 # change current player
+                                pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
                                 curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
                                 valors.secondPhase_currPhase = valors.GAMEPLAY_SELECT_PIECE_TO_MOVE
                                 valors.piece_clicked = (0, 0)
@@ -309,6 +359,7 @@ def secondPhaseGame(mouse_x, mouse_y, curr_player):
                                 return valors.GAMEPLAY_FINAL_PHASE, curr_player
                             else:
                                 # change current player
+                                pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
                                 curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
                                 valors.secondPhase_currPhase = valors.GAMEPLAY_SELECT_PIECE_TO_MOVE
                                 valors.piece_clicked = (0, 0)
@@ -322,8 +373,69 @@ def secondPhaseGame(mouse_x, mouse_y, curr_player):
                     valors.secondPhase_currPhase = valors.GAMEPLAY_NO_VALID_MOVES
                     drawBoard(valors.secondPhase_currPhase, curr_player)
         else:
-            # get ai move
-            pass
+            return_piece, return_move = get_ai_move(valors.GAMEPLAY_SECOND_PHASE, curr_player)
+            valors.player_pieces_onboard[curr_player][valors.player_pieces_onboard[curr_player].index(return_piece)] = return_move
+            drawBoard(valors.secondPhase_currPhase, curr_player)
+            drawCurrentBoard()
+
+            # check if curr_player place a 3 consecutive pieces
+            if isConsecutivePoints(curr_player):
+                # store the 3 pieces so that if next move 
+                # that 3 pieces are not valid as a mill
+                # unless it moved
+
+                if isPiecesAlreadyMills(curr_player):
+                    valors.piece_clicked = (0, 0)
+                    valors.prev_piece_clicked = (0, 0)
+                    valors.curr_piece_clicked = False
+                    return valors.GAMEPLAY_REMOVE_PIECE, curr_player
+            else:
+                valors.player_pieces_mills[curr_player] = []
+                valors.player_pieces_prev_mills[curr_player] = []
+
+            # check if curr_player already won
+            winner = isCurrentPlayerWon(curr_player)
+            if winner != 0:
+                if winner == valors.player_user:
+                    return valors.GAMEPLAY_PLAYER_WON, winner
+                else:
+                    return valors.GAMEPLAY_PLAYER_LOSE, curr_player
+            
+            # check if the game is draw
+            if isGameDraw(curr_player):
+                return valors.GAMEPLAY_PLAYER_DRAW, curr_player
+            
+            print(f"--->len(valors.player_pieces_onboard[curr_player]): {len(valors.player_pieces_onboard[curr_player])}")
+            print(f"--->len(valors.player_pieces_onboard[opponent_player]): {len(valors.player_pieces_onboard[opponent_player])}")
+
+            if len(valors.player_pieces_onboard[curr_player]) == 3 and len(valors.player_pieces_onboard[opponent_player]) == 3:
+                displayFeedback("FINAL PHASE.", (650, 185))
+                pygame.time.wait(1000)  
+
+                # change current player
+                pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
+                curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+                valors.secondPhase_currPhase = valors.GAMEPLAY_SELECT_PIECE_TO_MOVE
+                valors.piece_clicked = (0, 0)
+                valors.prev_piece_clicked = (0, 0)
+                valors.curr_piece_clicked = False
+
+                drawBoard(valors.secondPhase_currPhase, curr_player)
+                drawCurrentBoard()
+                return valors.GAMEPLAY_FINAL_PHASE, curr_player
+            else:
+                # change current player
+                pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
+                curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+                valors.secondPhase_currPhase = valors.GAMEPLAY_SELECT_PIECE_TO_MOVE
+                valors.piece_clicked = (0, 0)
+                valors.prev_piece_clicked = (0, 0)
+                valors.curr_piece_clicked = False
+                
+                drawBoard(valors.secondPhase_currPhase, curr_player)
+                drawCurrentBoard()
+                return valors.GAMEPLAY_SECOND_PHASE, curr_player
+
         drawCurrentBoard()
         return valors.GAMEPLAY_SECOND_PHASE, curr_player
         
@@ -415,6 +527,7 @@ def finalPhaseGame(mouse_x, mouse_y, curr_player):
                             return valors.GAMEPLAY_PLAYER_DRAW, curr_player
                         
                         # change current player
+                        pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
                         curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
                         valors.secondPhase_currPhase = valors.GAMEPLAY_SELECT_PIECE_TO_MOVE
                         valors.piece_clicked = (0, 0)
@@ -427,8 +540,53 @@ def finalPhaseGame(mouse_x, mouse_y, curr_player):
                 valors.secondPhase_currPhase = valors.GAMEPLAY_NO_VALID_MOVES
                 drawBoard(valors.secondPhase_currPhase, curr_player)
     else:
-        # get ai moves
-        pass
+        # get ai move
+        # the flow is 
+        #   get a piece from the board then choose which point it will go
+        # valors.player_pieces_onboard[curr_player][valors.player_pieces_onboard[curr_player].index(valors.piece_clicked)] = curr_player_move
+
+        return_piece, return_move = get_ai_move(valors.GAMEPLAY_FINAL_PHASE, curr_player)
+        valors.player_pieces_onboard[curr_player][valors.player_pieces_onboard[curr_player].index(return_piece)] = return_move
+        drawBoard(valors.secondPhase_currPhase, curr_player)
+        drawCurrentBoard()
+
+        # check if curr_player place a 3 consecutive pieces
+        if isConsecutivePoints(curr_player):
+            # store the 3 pieces so that if next move 
+            # that 3 pieces are not valid as a mill
+            # unless it moved
+            
+            if isPiecesAlreadyMills(curr_player):
+                valors.piece_clicked = (0, 0)
+                valors.prev_piece_clicked = (0, 0)
+                valors.curr_piece_clicked = False
+                return valors.GAMEPLAY_REMOVE_PIECE, curr_player
+        else:
+            valors.player_pieces_mills[curr_player] = []
+            valors.player_pieces_prev_mills[curr_player] = []
+
+        # check if curr_player already won
+        winner = isCurrentPlayerWon(curr_player)
+        if winner != 0:
+            if winner == valors.player_user:
+                return valors.GAMEPLAY_PLAYER_WON, winner
+            else:
+                return valors.GAMEPLAY_PLAYER_LOSE, curr_player
+        
+        # check if the game is draw
+        if isGameDraw(curr_player):
+            return valors.GAMEPLAY_PLAYER_DRAW, curr_player
+        
+        # change current player
+        curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+        valors.secondPhase_currPhase = valors.GAMEPLAY_SELECT_PIECE_TO_MOVE
+        valors.piece_clicked = (0, 0)
+        valors.prev_piece_clicked = (0, 0)
+        valors.curr_piece_clicked = False
+        drawBoard(valors.secondPhase_currPhase, curr_player)
+        drawCurrentBoard()
+        return valors.GAMEPLAY_FINAL_PHASE, curr_player
+        
     drawCurrentBoard()
     return valors.GAMEPLAY_FINAL_PHASE, curr_player
 
@@ -447,7 +605,7 @@ def drawBoard(curr_phase, curr_user):
         background_image = pygame.image.load(valors.game_bg6_got3piece)
     elif curr_phase == valors.GAMEPLAY_PLAYER_WON and curr_user == valors.player_user:
         background_image = pygame.image.load(valors.game_bg7_youWon)
-    elif curr_phase == valors.GAMEPLAY_PLAYER_LOSE and curr_user != valors.player_user:
+    elif curr_phase == valors.GAMEPLAY_PLAYER_LOSE and curr_user == valors.player_user:
         background_image = pygame.image.load(valors.game_bg8_youLose)
     elif curr_phase == valors.GAMEPLAY_PLAYER_DRAW:
         background_image = pygame.image.load(valors.game_bg9_draw)
@@ -613,7 +771,17 @@ def isConsecutivePoints(curr_player):
 def isPiecesAlreadyMills(curr_player):
     print(f"player_pieces_mills: {valors.player_pieces_mills[curr_player]}")
     print(f"player_pieces_prev_mills: {valors.player_pieces_prev_mills[curr_player]}")
-    if valors.player_pieces_mills[curr_player] == valors.player_pieces_prev_mills[curr_player]:
+    # if valors.player_pieces_mills[curr_player] == valors.player_pieces_prev_mills[curr_player] or valors.player_pieces_mills[curr_player] in valors.player_pieces_prev_mills[curr_player]:
+    #     return False
+    # else:
+    #     valors.player_pieces_prev_mills[curr_player] = valors.player_pieces_mills[curr_player]
+    #     return True
+    current_mills = set(valors.player_pieces_mills[curr_player])
+    previous_mills = set(valors.player_pieces_prev_mills[curr_player])
+
+    # Check if current mills are either equal to or a subset of previous mills
+    if current_mills == previous_mills or current_mills.issubset(previous_mills):
+        valors.player_pieces_prev_mills[curr_player] = valors.player_pieces_mills[curr_player]
         return False
     else:
         valors.player_pieces_prev_mills[curr_player] = valors.player_pieces_mills[curr_player]
@@ -640,52 +808,89 @@ def removeOpponentPiece(mouse_x, mouse_y, curr_player, current_phase):
     else:
         print(f"[Error] Invalid curr_player. curr_player: {curr_player}")
 
-    # make green point to the valid moves of the piece
-    for vpoint in valid_pieces_toRemove:
-        pygame.draw.circle(screen, valors.GREEN, vpoint, 20, width=5) 
+    if curr_player == valors.player_user:
+        # make green point to the valid moves of the piece
+        for vpoint in valid_pieces_toRemove:
+            pygame.draw.circle(screen, valors.GREEN, vpoint, 20, width=5) 
 
-    for piece in valid_pieces_toRemove:
-        distance = ((mouse_x - piece[0]) ** 2 + (mouse_y - piece[1]) ** 2) ** 0.5
-        if distance <= valors.POINT_RADIUS:
-            if piece in valid_pieces_toRemove:
-                valors.player_pieces_onboard[opponent_player].remove(piece)
-                
-                # check if curr_player already won
-                winner = isCurrentPlayerWon(curr_player)
-                if winner != 0:
-                    if winner == valors.player_user:
-                        return valors.GAMEPLAY_PLAYER_WON, curr_player
+        for piece in valid_pieces_toRemove:
+            distance = ((mouse_x - piece[0]) ** 2 + (mouse_y - piece[1]) ** 2) ** 0.5
+            if distance <= valors.POINT_RADIUS:
+                if piece in valid_pieces_toRemove:
+                    valors.player_pieces_onboard[opponent_player].remove(piece)
+                    
+                    # check if curr_player already won
+                    winner = isCurrentPlayerWon(curr_player)
+                    if winner != 0:
+                        if winner == valors.player_user:
+                            return valors.GAMEPLAY_PLAYER_WON, curr_player
+                        else:
+                            return valors.GAMEPLAY_PLAYER_LOSE, curr_player
+                    
+                    if valors.player_pieces_onhold[curr_player] > 0:
+                        pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
+                        curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+                        drawBoard(valors.GAMEPLAY_PHASE, curr_player)
+                        drawCurrentBoard()
+                        drawPieces()
+                        drawAvailableMoves()
+                        return valors.GAMEPLAY_PHASE, curr_player
+                    elif len(valors.player_pieces_onboard[curr_player]) == 3 and len(valors.player_pieces_onboard[opponent_player]) == 3:
+                        if not valors.isFinal_phase:
+                            displayFeedback("FINAL PHASE.", (650, 185))
+                            pygame.time.wait(1000)
+                            valors.isFinal_phase = True
+                        pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
+                        curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+                        drawBoard(valors.GAMEPLAY_SECOND_PHASE, curr_player)
+                        drawCurrentBoard()
+                        return valors.GAMEPLAY_FINAL_PHASE, curr_player
                     else:
-                        return valors.GAMEPLAY_PLAYER_LOSE, curr_player
-                
-                if valors.player_pieces_onhold[curr_player] > 0:
-                    curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
-                    drawBoard(valors.GAMEPLAY_PHASE, curr_player)
+                        pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1000, 1)}))
+                        curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+                        drawBoard(valors.GAMEPLAY_SECOND_PHASE, curr_player)
+                        drawCurrentBoard()
+                        return valors.GAMEPLAY_SECOND_PHASE, curr_player
+                else:
+                    displayFeedback("CANNOT REMOVE OPPONENT'S MILL", (600, 185))
+                    pygame.time.wait(1000)
+                    drawBoard(current_phase, curr_player)
                     drawCurrentBoard()
                     drawPieces()
-                    drawAvailableMoves()
-                    return valors.GAMEPLAY_PHASE, curr_player
-                elif len(valors.player_pieces_onboard[curr_player]) == 3 and len(valors.player_pieces_onboard[opponent_player]) == 3:
-                    if not valors.isFinal_phase:
-                        displayFeedback("FINAL PHASE.", (650, 185))
-                        pygame.time.wait(1000)
-                        valors.isFinal_phase = True
-                    curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
-                    drawBoard(valors.GAMEPLAY_SECOND_PHASE, curr_player)
-                    drawCurrentBoard()
-                    return valors.GAMEPLAY_FINAL_PHASE, curr_player
-                else:
-                    curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
-                    drawBoard(valors.GAMEPLAY_SECOND_PHASE, curr_player)
-                    drawCurrentBoard()
-                    return valors.GAMEPLAY_SECOND_PHASE, curr_player
+    else:
+        return_value = get_ai_move(valors.GAMEPLAY_REMOVE_PIECE, curr_player)
+        valors.player_pieces_onboard[opponent_player].remove(return_value)
+                    
+        # check if curr_player already won
+        winner = isCurrentPlayerWon(curr_player)
+        if winner != 0:
+            if winner == valors.player_user:
+                return valors.GAMEPLAY_PLAYER_WON, curr_player
             else:
-                displayFeedback("CANNOT REMOVE OPPONENT'S MILL", (600, 185))
+                return valors.GAMEPLAY_PLAYER_LOSE, curr_player
+        
+        if valors.player_pieces_onhold[curr_player] > 0:
+            curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+            drawBoard(valors.GAMEPLAY_PHASE, curr_player)
+            drawCurrentBoard()
+            drawPieces()
+            drawAvailableMoves()
+            return valors.GAMEPLAY_PHASE, curr_player
+        elif len(valors.player_pieces_onboard[curr_player]) == 3 and len(valors.player_pieces_onboard[opponent_player]) == 3:
+            if not valors.isFinal_phase:
+                displayFeedback("FINAL PHASE.", (650, 185))
                 pygame.time.wait(1000)
-                drawBoard(current_phase, curr_player)
-                drawCurrentBoard()
-                drawPieces()
-    
+                valors.isFinal_phase = True
+            curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+            drawBoard(valors.GAMEPLAY_SECOND_PHASE, curr_player)
+            drawCurrentBoard()
+            return valors.GAMEPLAY_FINAL_PHASE, curr_player
+        else:
+            curr_player = valors.player_two if curr_player == valors.player_one else valors.player_one
+            drawBoard(valors.GAMEPLAY_SECOND_PHASE, curr_player)
+            drawCurrentBoard()
+            return valors.GAMEPLAY_SECOND_PHASE, curr_player
+
     return valors.GAMEPLAY_REMOVE_PIECE, curr_player
 
 def displayFeedback(text, position):
@@ -831,7 +1036,8 @@ if __name__ == "__main__":
 
         if prev_phase != current_phase and prev_phase != valors.GAMEPLAY_REMOVE_PIECE and prev_phase != valors.GAMEPLAY_PLAYER_WON and prev_phase != valors.GAMEPLAY_PLAYER_LOSE and prev_phase != valors.GAMEPLAY_PLAYER_DRAW:
             pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (1, 1)}))
-
+        
+        
         # Update the display
         pygame.display.flip()
         
