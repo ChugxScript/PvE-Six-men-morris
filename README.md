@@ -18,7 +18,7 @@
 
 ## USAGE
 - Clone repository `https://github.com/ChugxScript/PvE-Six-men-morris.git`
-- Run program then play
+- Run `main.py` then play
 
 ------------------
 
