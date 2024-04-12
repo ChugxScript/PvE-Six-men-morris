@@ -3,7 +3,7 @@
   6 Men's Morris, also known as Sixes or Six Men's Morris, is a classic board game that dates back to ancient times. It is a strategy game that combines elements of placement and movement, where players aim to form rows of their pieces while blocking their opponent's moves.
 </p>
 <p>
-  _This serves as Machine Problem 4 in Artificial Intelligence (AI) Subject_
+  *This serves as Machine Problem 4 in Artificial Intelligence (AI) Subject*
 </p>
 
 ------------------
