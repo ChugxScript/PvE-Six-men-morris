@@ -31,6 +31,7 @@ def get_ai_move(phase, curr_player):
             
             # Check if the move blocks opponent's mills
             eval += block_opponent_mill(set(valors.player_pieces_onboard[opponent_player]), move)
+            eval += make_mill(set(valors.player_pieces_onboard[curr_player]), move)
 
             if eval > max_eval:
                 max_eval = eval
@@ -43,12 +44,13 @@ def get_ai_move(phase, curr_player):
         # evaluate which piece and move has the best result the return the piece and the move
 
         for piece in valors.player_pieces_onboard[curr_player]:
-            for move in ai_checkPieceValidMoves(piece, set(valors.player_pieces_onboard[curr_player]), set(valors.player_pieces_onboard[opponent_player])):
-                new_ai_pieces = set(valors.player_pieces_onboard[curr_player].copy())
+            for move in ai_checkPieceValidMoves(piece, ai_pieces_onboard, opponent_pieces_onboard):
+                new_ai_pieces = ai_pieces_onboard.copy()
                 new_ai_pieces.add(move)
                 
-                eval = minimax(new_ai_pieces, depth, 0, set(valors.player_pieces_onboard[opponent_player]), 0)
-                eval += block_opponent_mill(set(valors.player_pieces_onboard[opponent_player]), move)
+                eval = minimax(new_ai_pieces, depth, 0, opponent_pieces_onboard, 0)
+                eval += block_opponent_mill(opponent_pieces_onboard, move)
+                eval += make_mill(ai_pieces_onboard, move)
 
                 if eval > max_eval:
                     max_eval = eval
@@ -62,12 +64,13 @@ def get_ai_move(phase, curr_player):
         # evaluate which piece and move has the best result the return the piece and the move
 
         for piece in valors.player_pieces_onboard[curr_player]:
-            for move in ai_checkAvailableMoves(piece, valors.player_pieces_onboard[curr_player], valors.player_pieces_onboard[opponent_player], 1):
+            for move in ai_checkAvailableMoves(ai_pieces_onboard, opponent_pieces_onboard, 1):
                 new_ai_pieces = set(valors.player_pieces_onboard[curr_player].copy())
                 new_ai_pieces.add(move)
                 
                 eval = minimax(new_ai_pieces, depth, 0, set(valors.player_pieces_onboard[opponent_player]), 0)
                 eval += block_opponent_mill(set(valors.player_pieces_onboard[opponent_player]), move)
+                eval += make_mill(set(valors.player_pieces_onboard[curr_player]), move)
 
                 if eval > max_eval:
                     max_eval = eval
@@ -274,4 +277,16 @@ def block_opponent_mill(opponent_pieces, ai_move):
                     count += 1
             if count == 2:
                 return 100  # Block opponent's mill
+    return 0
+
+def make_mill(ai_pieces, ai_move):
+    for group in valors.consecutive_points:
+        if ai_move in group:
+            # Check if adding AI's move completes a mill
+            count = 0
+            for point in group:
+                if point in ai_pieces:
+                    count += 1
+            if count == 2:
+                return 200  # AI makes a mill
     return 0

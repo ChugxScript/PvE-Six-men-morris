@@ -607,6 +607,8 @@ def drawBoard(curr_phase, curr_user):
         background_image = pygame.image.load(valors.game_bg7_youWon)
     elif curr_phase == valors.GAMEPLAY_PLAYER_LOSE and curr_user == valors.player_user:
         background_image = pygame.image.load(valors.game_bg8_youLose)
+    elif curr_phase == valors.GAMEPLAY_PLAYER_LOSE and curr_user != valors.player_user:
+        background_image = pygame.image.load(valors.game_bg8_youLose)
     elif curr_phase == valors.GAMEPLAY_PLAYER_DRAW:
         background_image = pygame.image.load(valors.game_bg9_draw)
     elif curr_user != valors.player_user:
